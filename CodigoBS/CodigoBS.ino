@@ -14,24 +14,37 @@
 #include <SoftwareSerial.h>
 #include "Arduino.h" 
 #include "DFRobotDFPlayerMini.h"
-SoftwareSerial BT(2,3); // 10 RX, 11 TX
-SoftwareSerial DFPlayerSerial(10,11); //8 RX, 9 TX
+SoftwareSerial BT(2,3); // 2 RX, 3 TX
+SoftwareSerial DFPlayerSerial(10,11); //10 RX, 11 TX
 
 DFRobotDFPlayerMini myDFPlayer;                               
 
 //Variables
-byte LedE = 3;
+byte LedE = 4;
 char DataBluetooth;
 
 void setup() {
-  Serial.begin(115200);
-  BT.begin(9600);
-  Serial.println("");
-  Serial.println("Iniciando Control Bluetooth");
-  
   //Pines de salida
   pinMode(LedE, OUTPUT);
   digitalWrite(LedE, LOW);
+  
+  Serial.begin(115200);
+  DFPlayerSerial.begin(9600);
+  
+   if (!myDFPlayer.begin(DFPlayerSerial)) {  //Use softwareSerial to communicate with mp3.
+    Serial.println(F("Error inicializando modulo mp3"));
+    Serial.println(F("1.Porfavor revisa las conexiones!"));
+    Serial.println(F("2.Porfavor inserta memoria microSD!"));
+    while(true){
+      delay(0); // Code to compatible with ESP8266 watch dog.
+    }
+  }else{
+    Serial.println(F("Inicialización correcta DFPlayer."));
+    BT.begin(9600);
+    Serial.println("Inicialización correcta Bluetooth");
+    delay(1000);
+    digitalWrite(LedE, HIGH);
+  }
 }
 
 void loop() {
@@ -42,35 +55,17 @@ void loop() {
     
     if(DataBluetooth == 'A'){
       reproducir(1);
-      digitalWrite(LedE, HIGH);
-      Serial.println("\nFin de la ejecucion");
+      Serial.println("Fin de la ejecucion");
     }
     if(DataBluetooth == 'B'){
-      reproducir(2);
-      digitalWrite(LedE, HIGH);
-      Serial.println("\nEnd IF");
+      reproducir(2); 
+      Serial.println("Fin de la ejecucion");
     }
    }
 }
-
-void validarCard(){
-   DFPlayerSerial.begin(9600);
-   if (!myDFPlayer.begin(DFPlayerSerial)) {  //Use softwareSerial to communicate with mp3.
-    Serial.println(F("Unable to begin:"));
-    Serial.println(F("1.Please recheck the connection!"));
-    Serial.println(F("2.Please insert the SD card!"));
-    while(true){
-      delay(0); // Code to compatible with ESP8266 watch dog.
-    }
-  }else{
-    Serial.println(F("\nDFPlayer Mini Conectado.\n"));
-  }
-}
-
 void reproducir(int r){
-  validarCard();
   myDFPlayer.volume(30);   //De 0 a 30
   myDFPlayer.play(r);
   delay(10);
-  Serial.println("Reproduciendo");
+  Serial.println("\nReproduciendo");
 }
