@@ -22,6 +22,7 @@ DFRobotDFPlayerMini myDFPlayer;
 //Variables
 byte LedE = 4;
 char DataBluetooth;
+int Data;
 
 void setup() {
   //Pines de salida
@@ -48,21 +49,27 @@ void setup() {
 }
 
 void loop() {
+  leerDatos();
+}
+void leerDatos(){
   //Si hay datos disponibles en el modulo bluetooth HC-05
   if (BT.available()){
     DataBluetooth = BT.read();
     Serial.print(DataBluetooth);
+    Data = String(DataBluetooth).toInt();
+    int DataLocal = String(DataBluetooth).toInt();
+    Serial.print(Data);
     
-    if(DataBluetooth == 'A'){
-      reproducir(1);
-      Serial.println("Fin de la ejecucion");
-    }
-    if(DataBluetooth == 'B'){
-      reproducir(2); 
-      Serial.println("Fin de la ejecucion");
-    }
+    eleccion(DataLocal, Data);
    }
 }
+void eleccion(int Dl, int Dr){
+    if(Dl == Dr){
+      reproducir(Data);
+      Serial.println("Fin de la ejecucion");
+    }
+}
+
 void reproducir(int r){
   myDFPlayer.volume(30);   //De 0 a 30
   myDFPlayer.play(r);
